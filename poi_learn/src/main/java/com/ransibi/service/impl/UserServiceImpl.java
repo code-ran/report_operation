@@ -18,10 +18,6 @@ public class UserServiceImpl implements IUserService {
     @Override
     public String getUserInfo() {
         List<Map<String, Object>> mapList = userMapper.selectUserInfo();
-        List<String> ptIdAll = new ArrayList<>(Arrays.asList("1","2","3","4"));
-        List<String> existPtId= new ArrayList<>(Arrays.asList("1","2"));
-        Collection<String> subtract = CollectionUtils.subtract(ptIdAll, existPtId);
-        System.out.println(subtract.toString());
         return mapList.toString();
     }
 }

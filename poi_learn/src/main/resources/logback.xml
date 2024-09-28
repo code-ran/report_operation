@@ -2,7 +2,7 @@
 <configuration>
     <!-- 日志存放路径 -->
     <property name="log.path" value="logs/userLog" />
-    <property name="log.history.path" value="logs/history/userLog" />
+    <property name="log.history.path" value="logs/history/poi_learn_log" />
     <!-- 日志输出格式 -->
     <property name="log.pattern" value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{40} - [%method,%line] - %msg%n" />
     <contextListener class="com.ransibi.config.LogHistoryListener"/>

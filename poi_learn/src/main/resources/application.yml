@@ -6,7 +6,8 @@ spring:
     #   数据源基本配置
     url: jdbc:mysql://localhost:3306/report_manager_db?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai
     username: root
-    password: 123456rsb
+#    password: 123456rsb
+    password: mysql0925
     driver-class-name: com.mysql.cj.jdbc.Driver
     type: com.alibaba.druid.pool.DruidDataSource
     #   数据源其他配置
@@ -52,6 +53,14 @@ spring:
 mybatis:
   mapperLocations: classpath:mapper/*.xml
 #      typeAliasesPackage:
+
+# 日志配置
+logging:
+  level:
+    com.ransibi.dao: debug
+    org.springframework: warn
+  config: classpath:logback.xml
+
 
 
 ## 配置mybatis分页插件

@@ -1,12 +1,37 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.ransibi.dao.UserMapper">
-    <select id="selectUserInfo" resultType="java.util.Map">
+    <sql id="userField">
+            user_name,phone,province,city,salary,hire_date,birthday,address,dept_id
+    </sql>
+    <select id="selectUserInfo" resultType="com.ransibi.pojo.User">
         SELECT
-            id "id",
-            user_name "userName",
-            phone "phone"
+            id AS id,
+            user_name AS userName,
+            phone AS phone,
+            hire_date AS hireDateFormat,
+            address AS address
         FROM
             tb_user
     </select>
+
+    <insert id="insertUser" parameterType="java.util.List">
+        INSERT INTO tb_user
+        (
+        <include refid="userField"/>
+        )VALUES
+        <foreach collection="userList" item="item" separator=",">
+             (
+            '${item.userName}',
+            '${item.phone}',
+            '${item.province}',
+            '${item.city}',
+            '${item.salary}',
+            '${item.hireDateFormat}',
+            '${item.birthdayFormat}',
+            '${item.address}',
+            '${item.deptId}'
+            )
+        </foreach>
+    </insert>
 </mapper>

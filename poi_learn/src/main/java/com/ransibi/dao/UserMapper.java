@@ -1,12 +1,15 @@
 package com.ransibi.dao;
 
+import com.github.pagehelper.Page;
+import com.ransibi.pojo.User;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
-import java.util.Map;
 
 
 @Repository
 public interface UserMapper {
-    List<Map<String,Object>> selectUserInfo();
+    List<User> selectUserInfo();
+
+    void insertUser(List<User> userList);
 }

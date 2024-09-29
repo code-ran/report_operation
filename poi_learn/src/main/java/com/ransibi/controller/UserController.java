@@ -30,8 +30,12 @@ public class UserController {
 
     @GetMapping("/downLoadXlsxByPoi")
     public void downLoadXlsxByPoi(HttpServletResponse response) throws Exception{
-//        userService.downLoadXlsxByPoi(response);
-//        userService.downLoadXlsxByPoiWithCellStyle(response);
-        iUserService.downLoadXlsxByPoiWithTemplate(response);
+        //无样式导出
+//        iUserService.downLoadXlsxByPoi(response);
+        //含样式导出
+//        iUserService.downLoadXlsxByPoiWithCellStyle(response);
+        //个人测试案例导出
+        iUserService.exportTest(response);
     }
+
 }

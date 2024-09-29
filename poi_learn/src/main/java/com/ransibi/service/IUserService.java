@@ -12,5 +12,9 @@ public interface IUserService {
 
     String uploadExcelInfo(MultipartFile file) throws Exception;
 
-    void downLoadXlsxByPoiWithTemplate(HttpServletResponse response) throws Exception;
+    void downLoadXlsxByPoi(HttpServletResponse response) throws Exception;
+
+    void downLoadXlsxByPoiWithCellStyle(HttpServletResponse response) throws Exception;
+
+    void exportTest(HttpServletResponse response) throws Exception;
 }

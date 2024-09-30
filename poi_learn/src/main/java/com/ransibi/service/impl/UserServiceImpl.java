@@ -504,6 +504,21 @@ public class UserServiceImpl implements IUserService {
         //时间
         obj3.setChkTime(new Date());
         reCloseBaseBeanList.add(obj3);
+
+//        ReCloseBaseBean obj4 = new ReCloseBaseBean();
+//        //地区
+//        obj4.setAreaName("白银公司");
+//        //厂站
+//        obj4.setStnName("330kV东台变");
+//        //装置
+//        obj4.setPtName("330kV断路器3322保护NSR-333A-G");
+//        //结果
+//        obj4.setIsAlarmName("正常");
+//        obj4.setSfInfo("NULL");
+//        obj4.setDiInfo("充电过流保护硬压板,0;充电过流保护软压板,-1");
+//        //时间
+//        obj4.setChkTime(new Date());
+//        reCloseBaseBeanList.add(obj4);
         return reCloseBaseBeanList;
     }
 

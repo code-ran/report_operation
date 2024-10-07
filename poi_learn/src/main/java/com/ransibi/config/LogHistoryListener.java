@@ -13,9 +13,6 @@ import java.util.Map;
 
 /**
  * @description: 获取日志最大保留时间
- * @author: yjd-闫九鼎
- * @create: 2022-06-17 11:46
- * @Version: 1.0
  */
 public class LogHistoryListener extends ContextAwareBase
         implements LoggerContextListener, LifeCycle {

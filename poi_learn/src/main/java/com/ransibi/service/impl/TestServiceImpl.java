@@ -63,44 +63,15 @@ public class TestServiceImpl implements ITestService {
         CellStyle tbStyle = createDataStyle(workbook);
         for (int rowIndex = 0; rowIndex < list.size(); rowIndex++) {
             ReCloseBaseBean bean = list.get(rowIndex);
-            String sfInfo = bean.getSfInfo();
-            String diInfo = bean.getDiInfo();
-            String[] sfArray = new String[0];
-            String[] diArray = new String[0];
-            if (StringUtils.isNotEmpty(sfInfo) && !sfInfo.equals("NULL")) {
-                sfArray = sfInfo.split(";");
-            }
-            if (StringUtils.isNotEmpty(diInfo) && !diInfo.equals("NULL")) {
-                diArray = diInfo.split(";");
-            }
+            String[] sfArray = StringUtils.isNotEmpty(bean.getSfInfo()) && !bean.getSfInfo().equals("NULL")
+                    ? bean.getSfInfo().split(";") : new String[0];
+            String[] diArray = StringUtils.isNotEmpty(bean.getDiInfo()) && !bean.getDiInfo().equals("NULL")
+                    ? bean.getDiInfo().split(";")
+                    : new String[0];
             int maxLength = getMaxLength(sfArray, diArray);
+            // TODO: 2024/10/8
             if (maxLength <= 1) {
-                for (String s : sfArray) {
-                    String[] item = s.split(",");
-                    //名称
-                    bean.setSfName(item[0]);
-                    //值
-                    bean.setSfValue(VALUE_MAP.get(item[1]));
-                }
-                for (String s : diArray) {
-                    String[] item = s.split(",");
-                    //名称
-                    bean.setDiName(item[0]);
-                    //值
-                    bean.setDiValue(VALUE_MAP.get(item[1]));
-                }
-                if (sfArray.length > 0 && diArray.length == 0) {
-                    //名称
-                    bean.setDiName("--");
-                    //值
-                    bean.setDiValue("--");
-                }
-                if (diArray.length > 0 && sfArray.length == 0) {
-                    //名称
-                    bean.setSfName("--");
-                    //值
-                    bean.setSfValue("--");
-                }
+                processSingleRow(sfArray, diArray, bean);
                 //都为NULL的情况或者(sf/di中仅存在一组的情况)
                 //直接生成一行,sf、di都为null
                 Row row = sheet.createRow(rowIndex + tbHeadUseNo);
@@ -140,59 +111,9 @@ public class TestServiceImpl implements ITestService {
                 cell = row.createCell(8);
                 cell.setCellValue(bean.getChkTimeFormat());
                 cell.setCellStyle(tbStyle);
-            }
-            if (maxLength == 2) {
-                //sf/di中存在两组信息
+            } else if (maxLength == 2) {
                 for (int i = 0; i < maxLength; i++) {
-                    if (sfArray.length >= diArray.length) {
-                        String[] item = sfArray[i].split(",");
-                        String sfName = item[0];
-                        String sfValue = VALUE_MAP.get(item[1]);
-                        bean.setSfName(StringUtils.isNotEmpty(sfName) ? sfName : "--");
-                        bean.setSfValue(StringUtils.isNotEmpty(sfValue) ? sfValue : "--");
-                        if (diArray.length == 2) {
-                            String[] item1 = diArray[i].split(",");
-                            String diName = item1[0];
-                            String diValue = VALUE_MAP.get(item1[1]);
-                            bean.setDiName(StringUtils.isNotEmpty(diName) ? diName : "--");
-                            bean.setDiValue(StringUtils.isNotEmpty(diValue) ? diValue : "--");
-                        }
-                        if (i == 0 && diArray.length == 1) {
-                            String[] item1 = diArray[0].split(",");
-                            String diName = item1[0];
-                            String diValue = VALUE_MAP.get(item1[1]);
-                            bean.setDiName(StringUtils.isNotEmpty(diName) ? diName : "--");
-                            bean.setDiValue(StringUtils.isNotEmpty(diValue) ? diValue : "--");
-                        }
-                        if ((i == 1 && diArray.length == 1) || (diArray.length == 0)) {
-                            bean.setDiName("--");
-                            bean.setDiValue("--");
-                        }
-                    } else {
-                        String[] item1 = diArray[i].split(",");
-                        String diName = item1[0];
-                        String diValue = VALUE_MAP.get(item1[1]);
-                        bean.setDiName(StringUtils.isNotEmpty(diName) ? diName : "--");
-                        bean.setDiValue(StringUtils.isNotEmpty(diValue) ? diValue : "--");
-                        if (sfArray.length == 2) {
-                            String[] item = sfArray[i].split(",");
-                            String sfName = item[0];
-                            String sfValue = VALUE_MAP.get(item[1]);
-                            bean.setSfName(StringUtils.isNotEmpty(sfName) ? sfName : "--");
-                            bean.setSfValue(StringUtils.isNotEmpty(sfValue) ? sfValue : "--");
-                        }
-                        if (i == 0 && sfArray.length == 1) {
-                            String[] item = sfArray[0].split(",");
-                            String sfName = item[0];
-                            String sfValue = VALUE_MAP.get(item[1]);
-                            bean.setSfName(StringUtils.isNotEmpty(sfName) ? sfName : "--");
-                            bean.setSfValue(StringUtils.isNotEmpty(sfValue) ? sfValue : "--");
-                        }
-                        if ((i == 1 && sfArray.length == 1) || (sfArray.length == 0)) {
-                            bean.setSfName("--");
-                            bean.setSfValue("--");
-                        }
-                    }
+                    processMultipleRows(sfArray, diArray, bean, i);
                     int lastRowNumTemp = sheet.getLastRowNum();
                     Row row = sheet.createRow(lastRowNumTemp + 1);
                     //第一列
@@ -250,6 +171,87 @@ public class TestServiceImpl implements ITestService {
         response.setHeader("content-disposition", "attachment;filename=" + new String(filename.getBytes(), "ISO8859-1"));
         response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
         workbook.write(response.getOutputStream());
+    }
+
+    private void processSingleRow(String[] sfArray, String[] diArray, ReCloseBaseBean bean) {
+        for (String s : sfArray) {
+            String[] item = s.split(",");
+            //名称
+            bean.setSfName(item[0]);
+            //值
+            bean.setSfValue(VALUE_MAP.get(item[1]));
+        }
+        for (String s : diArray) {
+            String[] item = s.split(",");
+            //名称
+            bean.setDiName(item[0]);
+            //值
+            bean.setDiValue(VALUE_MAP.get(item[1]));
+        }
+        if (sfArray.length > 0 && diArray.length == 0) {
+            //名称
+            bean.setDiName("--");
+            //值
+            bean.setDiValue("--");
+        }
+        if (diArray.length > 0 && sfArray.length == 0) {
+            //名称
+            bean.setSfName("--");
+            //值
+            bean.setSfValue("--");
+        }
+    }
+
+    private void processMultipleRows(String[] sfArray, String[] diArray, ReCloseBaseBean bean, int i) {
+        if (sfArray.length >= diArray.length) {
+            String[] item = sfArray[i].split(",");
+            String sfName = item[0];
+            String sfValue = VALUE_MAP.get(item[1]);
+            bean.setSfName(StringUtils.isNotEmpty(sfName) ? sfName : "--");
+            bean.setSfValue(StringUtils.isNotEmpty(sfValue) ? sfValue : "--");
+            if (diArray.length == 2) {
+                String[] item1 = diArray[i].split(",");
+                String diName = item1[0];
+                String diValue = VALUE_MAP.get(item1[1]);
+                bean.setDiName(StringUtils.isNotEmpty(diName) ? diName : "--");
+                bean.setDiValue(StringUtils.isNotEmpty(diValue) ? diValue : "--");
+            }
+            if (i == 0 && diArray.length == 1) {
+                String[] item1 = diArray[0].split(",");
+                String diName = item1[0];
+                String diValue = VALUE_MAP.get(item1[1]);
+                bean.setDiName(StringUtils.isNotEmpty(diName) ? diName : "--");
+                bean.setDiValue(StringUtils.isNotEmpty(diValue) ? diValue : "--");
+            }
+            if ((i == 1 && diArray.length == 1) || (diArray.length == 0)) {
+                bean.setDiName("--");
+                bean.setDiValue("--");
+            }
+        } else {
+            String[] item1 = diArray[i].split(",");
+            String diName = item1[0];
+            String diValue = VALUE_MAP.get(item1[1]);
+            bean.setDiName(StringUtils.isNotEmpty(diName) ? diName : "--");
+            bean.setDiValue(StringUtils.isNotEmpty(diValue) ? diValue : "--");
+            if (sfArray.length == 2) {
+                String[] item = sfArray[i].split(",");
+                String sfName = item[0];
+                String sfValue = VALUE_MAP.get(item[1]);
+                bean.setSfName(StringUtils.isNotEmpty(sfName) ? sfName : "--");
+                bean.setSfValue(StringUtils.isNotEmpty(sfValue) ? sfValue : "--");
+            }
+            if (i == 0 && sfArray.length == 1) {
+                String[] item = sfArray[0].split(",");
+                String sfName = item[0];
+                String sfValue = VALUE_MAP.get(item[1]);
+                bean.setSfName(StringUtils.isNotEmpty(sfName) ? sfName : "--");
+                bean.setSfValue(StringUtils.isNotEmpty(sfValue) ? sfValue : "--");
+            }
+            if ((i == 1 && sfArray.length == 1) || (sfArray.length == 0)) {
+                bean.setSfName("--");
+                bean.setSfValue("--");
+            }
+        }
     }
 
 

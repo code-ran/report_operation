@@ -58,7 +58,7 @@ public class TestServiceImpl implements ITestService {
         sheet.addMergedRegion(new CellRangeAddress(0, 0, 4, 5));
         sheet.addMergedRegion(new CellRangeAddress(0, 0, 6, 7));
         //表头已经占用的行数
-        int tbHeadUseNo = headerData.size();
+//        int tbHeadUseNo = headerData.size();
         // 设置表数据样式
         CellStyle tbStyle = createDataStyle(workbook);
         for (int rowIndex = 0; rowIndex < list.size(); rowIndex++) {
@@ -69,12 +69,12 @@ public class TestServiceImpl implements ITestService {
                     ? bean.getDiInfo().split(";")
                     : new String[0];
             int maxLength = getMaxLength(sfArray, diArray);
-            // TODO: 2024/10/8
             if (maxLength <= 1) {
                 processSingleRow(sfArray, diArray, bean);
                 //都为NULL的情况或者(sf/di中仅存在一组的情况)
                 //直接生成一行,sf、di都为null
-                Row row = sheet.createRow(rowIndex + tbHeadUseNo);
+                int lastRowNumTemp = sheet.getLastRowNum();
+                Row row = sheet.createRow(lastRowNumTemp+1);
                 //第一列
                 Cell cell = row.createCell(0);
                 cell.setCellValue(bean.getAreaName());
@@ -166,6 +166,10 @@ public class TestServiceImpl implements ITestService {
                 sheet.addMergedRegion(new CellRangeAddress(lastRowNum - 1, lastRowNum, 8, 8));
             }
         }
+        sheet.setColumnWidth(2, 50 * 256);
+        sheet.setColumnWidth(4, 25 * 256);
+        sheet.setColumnWidth(6, 25 * 256);
+        sheet.setColumnWidth(8, 25 * 256);
         //  一个流两个头
         String filename = "员工数据.xlsx";
         response.setHeader("content-disposition", "attachment;filename=" + new String(filename.getBytes(), "ISO8859-1"));
@@ -203,54 +207,38 @@ public class TestServiceImpl implements ITestService {
     }
 
     private void processMultipleRows(String[] sfArray, String[] diArray, ReCloseBaseBean bean, int i) {
-        if (sfArray.length >= diArray.length) {
-            String[] item = sfArray[i].split(",");
-            String sfName = item[0];
-            String sfValue = VALUE_MAP.get(item[1]);
-            bean.setSfName(StringUtils.isNotEmpty(sfName) ? sfName : "--");
-            bean.setSfValue(StringUtils.isNotEmpty(sfValue) ? sfValue : "--");
-            if (diArray.length == 2) {
-                String[] item1 = diArray[i].split(",");
-                String diName = item1[0];
-                String diValue = VALUE_MAP.get(item1[1]);
-                bean.setDiName(StringUtils.isNotEmpty(diName) ? diName : "--");
-                bean.setDiValue(StringUtils.isNotEmpty(diValue) ? diValue : "--");
-            }
-            if (i == 0 && diArray.length == 1) {
-                String[] item1 = diArray[0].split(",");
-                String diName = item1[0];
-                String diValue = VALUE_MAP.get(item1[1]);
-                bean.setDiName(StringUtils.isNotEmpty(diName) ? diName : "--");
-                bean.setDiValue(StringUtils.isNotEmpty(diValue) ? diValue : "--");
-            }
-            if ((i == 1 && diArray.length == 1) || (diArray.length == 0)) {
-                bean.setDiName("--");
-                bean.setDiValue("--");
-            }
+        processArray(sfArray, bean, true, i);
+        processArray(diArray, bean, false, i);
+    }
+
+    private void processArray(String[] array, ReCloseBaseBean bean, boolean isSf, int i) {
+        if (array.length == 0) {
+            setDefaultValues(bean, isSf);
+            return;
+        }
+        int index = Math.min(i, array.length - 1);
+        String[] item = array[index].split(",");
+        String name = item[0];
+        String value = VALUE_MAP.get(item[1]);
+        if (isSf) {
+            bean.setSfName(StringUtils.isNotEmpty(name) ? name : "--");
+            bean.setSfValue(StringUtils.isNotEmpty(value) ? value : "--");
         } else {
-            String[] item1 = diArray[i].split(",");
-            String diName = item1[0];
-            String diValue = VALUE_MAP.get(item1[1]);
-            bean.setDiName(StringUtils.isNotEmpty(diName) ? diName : "--");
-            bean.setDiValue(StringUtils.isNotEmpty(diValue) ? diValue : "--");
-            if (sfArray.length == 2) {
-                String[] item = sfArray[i].split(",");
-                String sfName = item[0];
-                String sfValue = VALUE_MAP.get(item[1]);
-                bean.setSfName(StringUtils.isNotEmpty(sfName) ? sfName : "--");
-                bean.setSfValue(StringUtils.isNotEmpty(sfValue) ? sfValue : "--");
-            }
-            if (i == 0 && sfArray.length == 1) {
-                String[] item = sfArray[0].split(",");
-                String sfName = item[0];
-                String sfValue = VALUE_MAP.get(item[1]);
-                bean.setSfName(StringUtils.isNotEmpty(sfName) ? sfName : "--");
-                bean.setSfValue(StringUtils.isNotEmpty(sfValue) ? sfValue : "--");
-            }
-            if ((i == 1 && sfArray.length == 1) || (sfArray.length == 0)) {
-                bean.setSfName("--");
-                bean.setSfValue("--");
-            }
+            bean.setDiName(StringUtils.isNotEmpty(name) ? name : "--");
+            bean.setDiValue(StringUtils.isNotEmpty(value) ? value : "--");
+        }
+        if (array.length == 1 && i > 0) {
+            setDefaultValues(bean, isSf);
+        }
+    }
+
+    private void setDefaultValues(ReCloseBaseBean bean, boolean isSf) {
+        if (isSf) {
+            bean.setSfName("--");
+            bean.setSfValue("--");
+        } else {
+            bean.setDiName("--");
+            bean.setDiValue("--");
         }
     }
 
@@ -321,6 +309,22 @@ public class TestServiceImpl implements ITestService {
         reCloseBaseBeanList.add(obj3);
 
 
+        ReCloseBaseBean obj6 = new ReCloseBaseBean();
+        //地区
+        obj6.setAreaName("白银公司");
+        //厂站
+        obj6.setStnName("220kV沙河变");
+        //装置
+        obj6.setPtName("220kV母联断路器2222第二套保护PCS-923A-G");
+        //结果
+        obj6.setIsAlarmName("异常");
+        obj6.setSfInfo("NULL");
+        obj6.setDiInfo("充电过流保护软压板,0");
+        //时间
+        obj6.setChkTime(new Date());
+        reCloseBaseBeanList.add(obj6);
+
+
         ReCloseBaseBean obj5 = new ReCloseBaseBean();
         //地区
         obj5.setAreaName("白银公司");
@@ -336,20 +340,20 @@ public class TestServiceImpl implements ITestService {
         obj5.setChkTime(new Date());
         reCloseBaseBeanList.add(obj5);
 
-//        ReCloseBaseBean obj4 = new ReCloseBaseBean();
-//        //地区
-//        obj4.setAreaName("白银公司");
-//        //厂站
-//        obj4.setStnName("330kV东台变");
-//        //装置
-//        obj4.setPtName("330kV断路器3322保护NSR-333A-G");
-//        //结果
-//        obj4.setIsAlarmName("正常");
-//        obj4.setSfInfo("NULL");
-//        obj4.setDiInfo("充电过流保护硬压板,0;充电过流保护软压板,-1");
-//        //时间
-//        obj4.setChkTime(new Date());
-//        reCloseBaseBeanList.add(obj4);
+        ReCloseBaseBean obj4 = new ReCloseBaseBean();
+        //地区
+        obj4.setAreaName("白银公司");
+        //厂站
+        obj4.setStnName("330kV东台变");
+        //装置
+        obj4.setPtName("330kV断路器3326保护NSR-333A-G");
+        //结果
+        obj4.setIsAlarmName("正常");
+        obj4.setSfInfo("NULL");
+        obj4.setDiInfo("充电过流保护硬压板,0;充电过流保护软压板,-1");
+        //时间
+        obj4.setChkTime(new Date());
+        reCloseBaseBeanList.add(obj4);
         return reCloseBaseBeanList;
     }
 

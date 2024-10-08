@@ -18,6 +18,4 @@ public interface IUserService {
     void downLoadXlsxByPoiWithCellStyle(HttpServletResponse response) throws Exception;
 
     void downLoadXlsxWithTemplate(HttpServletResponse response) throws Exception;
-
-    void exportTest(HttpServletResponse response) throws Exception;
 }

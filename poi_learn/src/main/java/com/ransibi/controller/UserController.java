@@ -1,6 +1,7 @@
 package com.ransibi.controller;
 
 import com.ransibi.pojo.User;
+import com.ransibi.service.ITestService;
 import com.ransibi.service.IUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -16,6 +17,9 @@ public class UserController {
 
     @Autowired
     IUserService iUserService;
+
+    @Autowired
+    ITestService iTestService;
 
     @GetMapping("/findPage")
     public List<User> getUser(
@@ -36,9 +40,9 @@ public class UserController {
         //含样式导出
 //        iUserService.downLoadXlsxByPoiWithCellStyle(response);
         //通过模版导出
-        iUserService.downLoadXlsxWithTemplate(response);
+//        iUserService.downLoadXlsxWithTemplate(response);
         //个人测试案例导出
-//        iUserService.exportTest(response);
+        iTestService.exportTest(response);
     }
 
 }

@@ -183,7 +183,7 @@ public class UserServiceImpl implements IUserService {
         int rowIndex = 2;
         Row row = null;
         Cell cell = null;
-        CellStyle contentRowCellStyle = contentRowCellStyle(workbook);
+        CellStyle contentRowCellStyle = contentRowCellStyleWay(workbook);
         for (User user : userList) {
             row = sheet.createRow(rowIndex);
             cell = row.createCell(0);
@@ -232,7 +232,7 @@ public class UserServiceImpl implements IUserService {
         int rowIndex = 2;
         Row row = null;
         Cell cell = null;
-        CellStyle contentRowCellStyle = contentRowCellStyle(workbook);
+        CellStyle contentRowCellStyle = contentRowCellStyleWay(workbook);
         for (User user : userList) {
             row = sheet.createRow(rowIndex);
             cell = row.createCell(0);
@@ -392,7 +392,7 @@ public class UserServiceImpl implements IUserService {
      * @param workbook
      * @return
      */
-    private static CellStyle contentRowCellStyle(Workbook workbook) {
+    private static CellStyle contentRowCellStyleWay(Workbook workbook) {
         //内容的样式
         CellStyle cellStyle = workbook.createCellStyle();
         //样式的克隆

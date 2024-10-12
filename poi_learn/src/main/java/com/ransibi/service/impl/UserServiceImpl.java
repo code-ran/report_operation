@@ -1,25 +1,32 @@
 package com.ransibi.service.impl;
 
+import cn.hutool.core.date.DateUnit;
+import cn.hutool.core.date.DateUtil;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.ransibi.dao.UserMapper;
-import com.ransibi.pojo.ReCloseBaseBean;
 import com.ransibi.pojo.User;
 import com.ransibi.service.IUserService;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.xssf.usermodel.XSSFClientAnchor;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ResourceUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.imageio.ImageIO;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 
 @Service
@@ -257,6 +264,61 @@ public class UserServiceImpl implements IUserService {
         sheet.setColumnWidth(4, 30 * 256);
         //导出的文件名称
         String filename = "用户列表数据.xlsx";
+        //设置文件的打开方式和mime类型
+        ServletOutputStream outputStream = response.getOutputStream();
+        response.setHeader("Content-Disposition", "attachment;filename=" + new String(filename.getBytes(), "ISO8859-1"));
+        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        workbook.write(outputStream);
+    }
+
+    @Override
+    public void downLoadFileInfo(Long id, HttpServletResponse response) throws Exception {
+        String templatePath = Class.class.getClass().getResource("/").getPath() + "template/user_info_template.xlsx";
+        Workbook workbook = new XSSFWorkbook(new File(templatePath));
+        Sheet sheetAt = workbook.getSheetAt(0);
+        User user = userMapper.selectByPrimaryKey(id);
+        //用户名
+        Cell cell = sheetAt.getRow(2).getCell(1);
+        cell.setCellValue(user.getUserName());
+        //手机号
+        sheetAt.getRow(3).getCell(1).setCellValue(user.getPhone());
+        //生日
+        sheetAt.getRow(4).getCell(1).setCellValue(user.getBirthdayFormat());
+        //工资
+        sheetAt.getRow(5).getCell(1).setCellValue(user.getSalary());
+        //入职日期、司龄
+        sheetAt.getRow(6).getCell(1).setCellValue(user.getHireDateFormat());
+        Date date = new Date();
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        Date parse = simpleDateFormat.parse(user.getHireDateFormat());
+        long between = DateUtil.between(parse, date, DateUnit.DAY);
+        sheetAt.getRow(6).getCell(3).setCellValue(between);
+        //省份、城市
+        sheetAt.getRow(7).getCell(1).setCellValue(user.getProvince());
+        sheetAt.getRow(7).getCell(3).setCellValue(user.getCity());
+        //现住址
+        sheetAt.getRow(8).getCell(1).setCellValue(user.getAddress());
+
+        //输出图片
+        File rootPath = new File(ResourceUtils.getURL("classpath:").getPath());
+        String photoPath = rootPath + user.getPhoto();
+        // 先创建一个字节输出流
+        ByteArrayOutputStream byteArrayOut = new ByteArrayOutputStream();
+        // BufferedImage是一个带缓冲区图像类,主要作用是将一幅图片加载到内存中
+        BufferedImage bufferImg = ImageIO.read(new File(photoPath));
+        // 把读取到图像放入到输出流中
+        ImageIO.write(bufferImg, "jpg", byteArrayOut);
+        // 创建一个绘图控制类，负责画图
+        Drawing patriarch = sheetAt.createDrawingPatriarch();
+        // 指定把图片放到哪个位置
+//        ClientAnchor anchor = new XSSFClientAnchor(0, 0, 0, 0, 2, 2, 3, 5);
+        //填充图片结束行结束列+1
+        ClientAnchor anchor = new XSSFClientAnchor(0, 0, 0, 0, 2, 2, 4, 6);
+        // 开始把图片写入到sheet指定的位置
+        patriarch.createPicture(anchor, workbook.addPicture(byteArrayOut.toByteArray(), Workbook.PICTURE_TYPE_JPEG));
+
+        //导出的文件名称
+        String filename = "用户数据.xlsx";
         //设置文件的打开方式和mime类型
         ServletOutputStream outputStream = response.getOutputStream();
         response.setHeader("Content-Disposition", "attachment;filename=" + new String(filename.getBytes(), "ISO8859-1"));

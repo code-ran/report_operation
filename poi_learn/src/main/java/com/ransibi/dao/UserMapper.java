@@ -12,4 +12,6 @@ public interface UserMapper {
     List<User> selectUserInfo();
 
     void insertUser(List<User> userList);
+
+    User selectByPrimaryKey(Long id);
 }

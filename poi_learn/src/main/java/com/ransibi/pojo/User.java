@@ -37,6 +37,11 @@ public class User {
     private Date hireDate;
 
     private String hireDateFormat;
+
+    /**
+     * 司龄
+     */
+    private String comeInTime;
     /**
      * 部门id
      */

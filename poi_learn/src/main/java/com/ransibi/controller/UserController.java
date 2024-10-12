@@ -23,9 +23,9 @@ public class UserController {
 
     @GetMapping("/findPage")
     public List<User> getUser(
-            @RequestParam(value = "page",defaultValue = "1") Integer page,
-            @RequestParam(value = "rows",defaultValue = "10") Integer pageSize){
-        return iUserService.getUserInfo(page,pageSize);
+            @RequestParam(value = "page", defaultValue = "1") Integer page,
+            @RequestParam(value = "rows", defaultValue = "10") Integer pageSize) {
+        return iUserService.getUserInfo(page, pageSize);
     }
 
     @PostMapping("/uploadExcel")
@@ -34,7 +34,7 @@ public class UserController {
     }
 
     @GetMapping("/downLoadXlsxByPoi")
-    public void downLoadXlsxByPoi( HttpServletResponse response) throws Exception{
+    public void downLoadXlsxByPoi(HttpServletResponse response) throws Exception {
         //无样式导出
 //        iUserService.downLoadXlsxByPoi(response);
         //含样式导出
@@ -43,6 +43,11 @@ public class UserController {
 //        iUserService.downLoadXlsxWithTemplate(response);
         //个人测试案例导出
         iTestService.exportTest(response);
+    }
+
+    @GetMapping("/download")
+    public void downloadFile(@RequestParam Long id, HttpServletResponse response) throws Exception {
+        iUserService.downLoadFileInfo(id, response);
     }
 
 }

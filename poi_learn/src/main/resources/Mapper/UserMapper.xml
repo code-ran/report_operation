@@ -34,4 +34,26 @@
             )
         </foreach>
     </insert>
+
+    <select id="selectByPrimaryKey" resultType="com.ransibi.pojo.User">
+        SELECT
+            id AS id,
+            user_name AS userName,
+            phone AS phone,
+            hire_date AS hireDateFormat,
+            address AS address,
+            birthday AS birthdayFormat,
+            salary AS salary,
+            province AS province,
+            city AS city,
+            address AS address,
+            photo AS photo
+        FROM
+            tb_user
+        <where>
+            <if test="id != null">
+                id = #{id}
+            </if>
+        </where>
+    </select>
 </mapper>
